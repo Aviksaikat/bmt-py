@@ -1,0 +1,27 @@
+{
+  "template": "https://github.com/frankie567/cookiecutter-hipster-pypackage",
+  "commit": "8d08540791a735c0668f08b8025719728c7677f9",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "full_name": "Saikat Karmakar",
+      "email": "king.arthur@camelot.bt",
+      "github_username": "aviksaikat",
+      "project_name": "bmt-py",
+      "dist_name": "bmt_py",
+      "package_name": "bmt_py",
+      "project_short_description": "Binary Merkle Tree operations on data",
+      "repository_name": "aviksaikat/bmt_py",
+      "repository_url": "https://github.com/aviksaikat/bmt_py",
+      "docs_url": "https://aviksaikat.github.io/bmt_py/",
+      "open_source_license": "BSD license",
+      "python_version": "3.9",
+      "asyncio": "N",
+      "docs_icon": "material/library",
+      "docs_color_primary": "indigo",
+      "docs_color_accent": "red",
+      "_template": "https://github.com/frankie567/cookiecutter-hipster-pypackage"
+    }
+  },
+  "directory": null
+}
