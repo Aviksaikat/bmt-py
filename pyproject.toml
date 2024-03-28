@@ -1,12 +1,87 @@
+[project]
+name = "bmt_py"
+authors = [
+  { name = "Saikat Karmakar", email = "saikickkarma@protonmail.com" }
+]
+description = "Binary Merkle Tree operations on data"
+readme = "README.md"
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+requires-python = ">=3.9"
+dependencies = [
+]
+
+[project.urls]
+Documentation = "https://aviksaikat.github.io/bmt_py/"
+Source = "https://github.com/aviksaikat/bmt_py"
+
+# mypy
+[tool.mypy]
+exclude = ["build/", "dist/", "docs/", "tests/*"]
+check_untyped_defs = true
+plugins = ["pydantic.mypy"]
+
 [tool.ruff]
+line-length = 120
 target-version = "py39"
+select = [
+    "A",
+    "ARG",
+    "B",
+    "C",
+    "DTZ",
+    "E",
+    "EM",
+    "F",
+    "FBT",
+    "ICN",
+    "ISC",
+    "N",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "Q",
+    "RUF",
+    "S",
+    "T",
+    "TID",
+    "UP",
+    "W",
+    "YTT",
+]
+
+ignore = [
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Ignore checks for possible passwords
+    "S105",
+    "S106",
+    "S107",
+    # Ignore complexity
+    "C901",
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+]
 
 [tool.ruff.lint]
 extend-select = ["I", "TRY", "UP"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=bmt_py/ --cov-report=term-missing"
-
 
 [tool.hatch]
 
@@ -16,19 +91,17 @@ allow-direct-references = true
 [tool.hatch.version]
 source = "regex_commit"
 commit_extra_args = ["-e"]
-path = "bmt_py/__init__.py"
+path = "src/bmt_py/__init__.py"
 
 [tool.hatch.envs.default]
 python = "3.9"
 dependencies = [
     "mypy",
     "ruff",
-    "pytest",
-    "pytest-cov",
     "mkdocs-material",
-    "mkdocstrings[python]",
-    
+    "mkdocstrings[python]",    
 ]
+
 
 [tool.hatch.envs.default.scripts]
 test = "pytest"
@@ -46,25 +119,26 @@ lint-check = [
 docs-serve = "mkdocs serve"
 docs-build = "mkdocs build"
 
+# Test settings
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["2.7", "3.8"]
+version = ["42", "3.14"]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.8", "3.9"]
+version = ["9000"]
+features = ["foo", "bar"]
+
+
 [build-system]
 requires = ["hatchling", "hatch-regex-commit"]
 build-backend = "hatchling.build"
 
-[project]
-name = "bmt_py"
-authors = [
-  { name = "bmt_py", email = "king.arthur@camelot.bt" }
-]
-description = "Binary Merkle Tree operations on data"
-readme = "README.md"
-dynamic = ["version"]
-classifiers = [
-    "Programming Language :: Python :: 3 :: Only",
-]
-requires-python = ">=3.9"
-dependencies = [
-]
-
-[project.urls]
-Documentation = "https://aviksaikat.github.io/bmt_py/"
-Source = "https://github.com/aviksaikat/bmt_py"
+[tool.hatch.build.targets.wheel]
+packages = ["src/foo"]

@@ -1,5 +1,4 @@
 import pytest
-
 from bmt_py import add
 
 

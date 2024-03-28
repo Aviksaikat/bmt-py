@@ -1,6 +1,6 @@
 """Binary Merkle Tree operations on data"""
 
-__version__ = "0.0.0"
+__version__ = "0.0.1"
 
 
 def add(a: int, b: int) -> int:

@@ -5,7 +5,7 @@
   "context": {
     "cookiecutter": {
       "full_name": "Saikat Karmakar",
-      "email": "king.arthur@camelot.bt",
+      "email": "",
       "github_username": "aviksaikat",
       "project_name": "bmt-py",
       "dist_name": "bmt_py",
