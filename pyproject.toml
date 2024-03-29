@@ -34,7 +34,7 @@ plugins = ["pydantic.mypy"]
 line-length = 120
 target-version = "py39"
 
-[ruff.lint]
+[tool.ruff.lint]
 select = [
     "A",
     "ARG",
@@ -79,8 +79,8 @@ ignore = [
     "PLR0915",
 ]
 
-[tool.ruff.lint]
-extend-select = ["I", "TRY", "UP"]
+# [tool.ruff.lint]
+# extend-select = ["I", "TRY", "UP"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=src/bmt_py/ --cov-report=term-missing"
@@ -102,6 +102,7 @@ dependencies = [
     "ruff",
     "eth-utils",
     "pydantic",
+    "swarm-bee-py",
     "mkdocs-material",
     "mkdocstrings[python]", 
 ]

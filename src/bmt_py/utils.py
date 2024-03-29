@@ -16,7 +16,6 @@ class FlexBytes(BaseModel, Generic[Min, Max]):
     compile time.
 
     Args:
-    data: The data of the byte array.
     min: The minimum length of the byte array.
     max: The maximum length of the byte array.
 
@@ -24,7 +23,6 @@ class FlexBytes(BaseModel, Generic[Min, Max]):
     ValueError: If the length of the byte array is not within the specified range.
     """
 
-    data: bytes
     min_length: Min
     max_length: Max
 
@@ -120,3 +118,21 @@ def bytes_equal(a: bytes, b: bytes) -> bool:
         return False
 
     return all(a[i] == b[i] for i in range(len(a)))
+
+
+def assert_flex_bytes(b: Any, min_length: int, max_length: int) -> bool:
+    """Asserts that `b` is a valid FlexBytes with minimum length `min_length` and maximum length `max_length`.
+
+    Args:
+        b (Any): The value to check.
+        min_length (int): The minimum length.
+        max_length (int): The maximum length.
+
+    Raises:
+        TypeError: If `b` is not a valid FlexBytes.
+    """
+    flex_bytes: FlexBytes = FlexBytes(min_length=min_length, max_length=max_length)
+
+    if not is_flex_bytes(b, flex_bytes):
+        return False
+    return True
