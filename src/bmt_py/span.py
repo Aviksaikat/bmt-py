@@ -43,18 +43,16 @@ def make_span(value: int, length: Optional[int]) -> bytes:
     return span
 
 
-def get_span_value(span: memoryview):
+def get_span_value(span: bytes) -> int:
     """
     Extract a 32-bit unsigned integer from the span's buffer.
 
     Args:
-        span (memoryview): The span containing the data.
+        span (bytes): The span containing the data.
 
     Returns:
         An integer value representing the unsigned 32-bit integer.
 
     """
     # return struct.unpack("I", span.cast("B", (span.nbytes)))[0]
-    data_view = span.tobytes()
-    (value,) = struct.unpack("I", data_view)
-    return value
+    return int.from_bytes(span[0:4], byteorder="little", signed=False)
