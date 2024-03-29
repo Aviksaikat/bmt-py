@@ -176,6 +176,3 @@ funky_experiments/*
 Env
 
 .vscode/*
-
-# hatch
-.ruff_cache/*
