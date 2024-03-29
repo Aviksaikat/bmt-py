@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.9']
+        python_version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
     - name: Lint and typecheck
       run: |
         hatch run lint-check
-    - name: Test
+    - name: coverage test
       run: |
         hatch run test-cov-xml
     - uses: codecov/codecov-action@v4
