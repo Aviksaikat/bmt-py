@@ -81,10 +81,12 @@ def bmt(payload: bytes, options: Optional[dict] = None) -> list[bytes]:
     """
     Gives back all levels of the binary Merkle tree (BMT) of the payload.
 
-    :param chunk_data: Any data in bytes object
-    :param options: Function configurations, including a custom hash function
-    :returns: Array of the whole BMT hash level of the given data.
-                 First level is the data itself until the last level that is the root hash itself.
+    Args:
+        chunk_data: Any data in bytes object
+        options: Function configurations, including a custom hash function
+    Returns:
+        Array of the whole BMT hash level of the given data.
+            First level is the data itself until the last level that is the root hash itself.
     """
     if len(payload) > DEFAULT_MAX_PAYLOAD_SIZE:
         msg = f"invalid data length {len(payload)}"
@@ -102,7 +104,9 @@ def bmt(payload: bytes, options: Optional[dict] = None) -> list[bytes]:
 
         # In each round, we hash the segment pairs together
         for offset in range(0, len(padded_data), SEGMENT_PAIR_SIZE):
-            hash_result = hash_function(padded_data[offset : offset + SEGMENT_PAIR_SIZE])
+            hash_result = hash_function(
+                padded_data[offset : offset + SEGMENT_PAIR_SIZE]
+            )
             hashed_data[offset // 2 : offset // 2 + len(hash_result)] = hash_result
 
         padded_data = hashed_data
@@ -113,15 +117,18 @@ def bmt(payload: bytes, options: Optional[dict] = None) -> list[bytes]:
     return bmt_tree
 
 
-def inclusion_proof_bottom_up(payload_bytes: bytes, segment_index: int, options: Optional[dict] = None):
+def inclusion_proof_bottom_up(
+    payload_bytes: bytes, segment_index: int, options: Optional[dict] = None
+):
     """
     Gives back required segments for inclusion proof of a given payload byte index.
 
-    :param payload_bytes: Chunk data initialized in bytes object
-    :param segment_index: Segment index in the data array that has to be proofed for inclusion
-    :param options: Function configuration
-    :returns: Required segments for inclusion proof starting from the data level
-                 until the BMT root hash of the payload
+    Args:
+        payload_bytes: Chunk data initialized in bytes object
+        segment_index: Segment index in the data array that has to be proofed for inclusion
+        options: Function configuration
+    Returns:
+        Required segments for inclusion proof starting from the data level until the BMT root hash of the payload
     """
     if segment_index * SEGMENT_SIZE >= len(payload_bytes):
         msg = f"The given segment index {segment_index} is greater than {len(payload_bytes) // SEGMENT_SIZE}"
@@ -133,7 +140,11 @@ def inclusion_proof_bottom_up(payload_bytes: bytes, segment_index: int, options:
     for level in range(root_hash_level):
         merge_coefficient = 1 if segment_index % 2 == 0 else -1
         sister_segment_index = segment_index + merge_coefficient
-        sister_segment = tree[level][sister_segment_index * SEGMENT_SIZE : (sister_segment_index + 1) * SEGMENT_SIZE]
+        sister_segment = tree[level][
+            sister_segment_index
+            * SEGMENT_SIZE : (sister_segment_index + 1)
+            * SEGMENT_SIZE
+        ]
         sister_segments.append(sister_segment)
         # Update segment_index for the next iteration
         segment_index >>= 1
@@ -150,11 +161,14 @@ def root_hash_from_inclusion_proof(
     """
     Calculates the BMT root hash from the provided inclusion proof segments and its corresponding segment index.
 
-    :param proof_segments: List of inclusion proof segments as bytes objects
-    :param prove_segment: The segment to be proven as bytes
-    :param prove_segment_index: The index of the segment to be proven
-    :param options: Function configurations, including a custom hash function
-    :returns: The calculated BMT root hash as bytes
+    Args:
+        proof_segments: List of inclusion proof segments as bytes objects
+        prove_segment: The segment to be proven as bytes
+        prove_segment_index: The index of the segment to be proven
+        options: Function configurations, including a custom hash function
+
+    Returns:
+        The calculated BMT root hash as bytes
     """
     hash_function = options.get("hashFn", keccak256_hash) if options else keccak256_hash
 
@@ -171,7 +185,9 @@ def root_hash_from_inclusion_proof(
     return calculated_hash
 
 
-def bmt_root_hash(chunk_data: bytes, max_payload_length: int = DEFAULT_MAX_PAYLOAD_SIZE, options=None) -> bytes:
+def bmt_root_hash(
+    chunk_data: bytes, max_payload_length: int = DEFAULT_MAX_PAYLOAD_SIZE, options=None
+) -> bytes:
     """
     Calculate the root hash of a binary Merkle tree (BMT) from the chunk data.
 
@@ -180,7 +196,8 @@ def bmt_root_hash(chunk_data: bytes, max_payload_length: int = DEFAULT_MAX_PAYLO
         max_payload_length: Maximum payload length, defaults to DEFAULT_MAX_PAYLOAD_SIZE
         options: Function configurations, including a custom hash function
 
-    :returns:The root hash of the binary Merkle tree as bytes
+    Returns:
+        The root hash of the binary Merkle tree as bytes
     """
     if len(chunk_data) > max_payload_length:
         msg = f"invalid data length {len(chunk_data)}"
@@ -198,7 +215,9 @@ def bmt_root_hash(chunk_data: bytes, max_payload_length: int = DEFAULT_MAX_PAYLO
 
         # In each round, we hash the segment pairs together
         for offset in range(0, len(padded_data), segment_pair_size):
-            hash_result = hash_function(padded_data[offset : offset + segment_pair_size])
+            hash_result = hash_function(
+                padded_data[offset : offset + segment_pair_size]
+            )
             hashed_data[offset // 2 : offset // 2 + len(hash_result)] = hash_result
 
         padded_data = hashed_data
@@ -222,11 +241,11 @@ def chunk_address(
     If the chunk content is less than 4k, the hash is calculated
     as if the chunk was padded with all zeros up to 4096 bytes.
 
-
-    :param payload: Chunk data bytes
-    :param span_length: Dedicated byte length for serializing span value of chunk
-    :param chunk_span: Constructed Span bytes object of the chunk
-    :param options: function configuraiton
+    Args:
+        payload: Chunk data bytes
+        span_length: Dedicated byte length for serializing span value of chunk
+        chunk_span: Constructed Span bytes object of the chunk
+        options: function configuraiton
 
     Returns:
         The Chunk address in a byte array
@@ -268,7 +287,9 @@ def make_chunk(
         return payload_bytes
 
     def inclusion_proof(segment_index: int) -> list[bytes]:
-        return inclusion_proof_bottom_up(payload_bytes, segment_index, {"hash_fn": hash_fn})
+        return inclusion_proof_bottom_up(
+            payload_bytes, segment_index, {"hash_fn": hash_fn}
+        )
 
     def address() -> str:
         return chunk_address(payload_bytes, span_length, span(), {"hash_fn": hash_fn})

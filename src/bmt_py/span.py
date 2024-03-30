@@ -14,7 +14,7 @@ def make_span(value: int, length: Optional[int]) -> bytes:
     The length is encoded in 64-bit little endian format.
 
     Args:
-        value(int): Value of the span
+        value (int): Value of the span
         length (int): The length of the chunk.
 
     Returns:

@@ -18,7 +18,26 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
+  "eth-utils",
+  "pydantic",
+  "swarm-bee-py",
 ]
+
+# Don't know we need this or not
+# [project.optional-dependencies]
+# docs = [
+#   "mkdocs-material",
+#   "mkdocstrings-python",
+#   "bmt_py @ file:///./"
+# ]
+
+# test = [
+#   "pytest",
+#   "pytest-cov",
+#   "ruff",
+#   "mypy"
+
+# ]
 
 [project.urls]
 Documentation = "https://aviksaikat.github.io/bmt_py/"
@@ -96,6 +115,7 @@ source = "regex_commit"
 commit_extra_args = ["-e"]
 path = "src/bmt_py/__init__.py"
 
+# Module dependencies
 [tool.hatch.envs.default]
 python = "3.9"
 dependencies = [
@@ -103,11 +123,16 @@ dependencies = [
     "ruff",
     "eth-utils",
     "pydantic",
-    "swarm-bee-py",
-    "mkdocs-material",
-    "mkdocstrings[python]", 
+    "swarm-bee-py",  
 ]
 
+# Documentation dependencies
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs-material",
+  "mkdocstrings-python",
+  "bmt_py @ file:///../bmt_py"
+]
 
 [tool.hatch.envs.default.scripts]
 test = "pytest"
@@ -122,10 +147,10 @@ lint-check = [
   "ruff check .",
   "mypy src/bmt_py/",
 ]
-docs-serve = "mkdocs serve"
+docs-serve = "mkdocs serve --clean"
 docs-build = "mkdocs build"
 
-# Test settings
+# Testing dependencies
 [tool.hatch.envs.test]
 dependencies = [
   "pytest",

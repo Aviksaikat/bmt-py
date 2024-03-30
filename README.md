@@ -25,6 +25,10 @@
 
 ---
 
+<details open>
+<summary>Development</summary>
+<br>
+
 ## Development
 
 ### Setup environment
@@ -75,7 +79,7 @@ You can serve the Mkdocs documentation with:
 hatch run docs-serve
 ```
 
-It'll automatically watch for changes in your code.
+</details>
 
 ## License
 

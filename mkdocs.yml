@@ -1,8 +1,8 @@
 site_name: bmt-py
 site_description: Binary Merkle Tree operations on data
 
-repo_url: https://github.com/aviksaikat/bmt_py
-repo_name: aviksaikat/bmt_py
+repo_url: https://github.com/aviksaikat/bmt-py
+repo_name: aviksaikat/bmt-py
 
 theme:
     name: material
@@ -56,9 +56,10 @@ plugins:
 
 watch:
     - docs
-    - bmt_py
+    - src/bmt_py
 
 nav:
     - About: index.md
+    - Development: development.md
     - Reference:
         - bmt_py: reference/bmt_py.md

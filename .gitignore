@@ -169,10 +169,11 @@ pyproject.toml.bak
 .pdm-python
 
 # ruff
-.ruff_cache/*
+.ruff_cache/
 
 # debugging scripts
 funky_experiments/*
 Env
 
-.vscode/*
+.vscode/
+.build/

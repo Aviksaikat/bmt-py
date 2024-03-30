@@ -9,18 +9,19 @@ Max = TypeVar("Max", bound=int)
 
 
 class FlexBytes(BaseModel, Generic[Min, Max]):
-    """Helper type for dealing with flexible sized byte arrays.
+    """
+    Helper type for dealing with flexible sized byte arrays.
 
     The actual min and and max values are not stored in runtime, they
     are only there to differentiate the type from the Uint8Array at
     compile time.
 
     Args:
-    min: The minimum length of the byte array.
-    max: The maximum length of the byte array.
+        Min (int): The minimum length of the byte array.
+        Max (int): The maximum length of the byte array.
 
     Raises:
-    ValueError: If the length of the byte array is not within the specified range.
+        ValueError: If the length of the byte array is not within the specified range.
     """
 
     min_length: Min
@@ -34,8 +35,10 @@ def keccak256_hash(*messages: Union[bytes, bytearray]) -> bytes:
     """
     Helper function for calculating the keccak256 hash with
 
-    @param messages Any number of messages (bytes, byte arrays)
-    returns bytes
+    Args:
+        messages: Any number of messages (bytes, byte arrays)
+    Returns:
+        bytes
     """
     combined = bytearray()
     for message in messages:
@@ -49,7 +52,7 @@ def keccak256_hash(*messages: Union[bytes, bytearray]) -> bytes:
 
 def serialize_bytes(*arrays: bytes) -> bytes:
     """
-    Serializes a sequence of byte arrays into a single byte array.
+    Serialises a sequence of byte arrays into a single byte array.
 
     Args:
         *arrays (bytes): The sequence of byte arrays to serialize.
@@ -71,7 +74,10 @@ def is_flex_bytes(b: Any, flex_bytes: FlexBytes) -> TypeGuard[bytes]:
             True if the value is a byte array within the specified length range, False otherwise.
     """
 
-    return isinstance(b, bytes) and flex_bytes.min_length <= len(b) <= flex_bytes.max_length
+    return (
+        isinstance(b, bytes)
+        and flex_bytes.min_length <= len(b) <= flex_bytes.max_length
+    )
 
 
 def bytes_to_hex(inp: Union[bytes, str], length: Optional[int] = None) -> str:
@@ -107,11 +113,11 @@ def bytes_equal(a: bytes, b: bytes) -> bool:
     """Returns True if the two byte arrays are equal, False otherwise.
 
     Args:
-            a: The first byte array to compare.
-            b: The second byte array to compare.
+        a: The first byte array to compare.
+        b: The second byte array to compare.
 
     Returns:
-            True if the two byte arrays are equal, False otherwise.
+        True if the two byte arrays are equal, False otherwise.
     """
 
     if len(a) != len(b):
@@ -127,7 +133,8 @@ def assert_flex_bytes(b: Any, min_length: int, max_length: int) -> bool:
         b (Any): The value to check.
         min_length (int): The minimum length.
         max_length (int): The maximum length.
-
+    Returns:
+        boolean: True if `b` is a valid FlexBytes
     Raises:
         TypeError: If `b` is not a valid FlexBytes.
     """

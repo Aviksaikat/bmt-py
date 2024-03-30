@@ -64,8 +64,9 @@ def pop_carrier_chunk(chunks: list[Chunk]) -> Optional[Chunk]:
     """
     Removes the carrier chunk from the given chunks array and returns it.
 
-    :param chunks: A list of Chunk objects
-    :return: The carrier chunk, or None if no carrier chunk is found
+    chunks: A list of Chunk objects
+    Returns:
+        : The carrier chunk, or None if no carrier chunk is found
     """
     if len(chunks) <= 1:
         return None
@@ -87,13 +88,17 @@ def create_intermediate_chunk(
     """
     Creates an intermediate chunk by combining the address bytes of the given children chunks.
 
-    :param children_chunks: A list of Chunk objects
-    :param span_length: Span length
-    :param max_payload_size: Maximum payload size
-    :return: A new intermediate chunk
+    Args:
+        children_chunks: A list of Chunk objects
+        span_length: Span length
+        max_payload_size: Maximum payload size
+    Returns:
+        A new intermediate chunk
     """
     chunk_addresses = [chunk.address() for chunk in children_chunks]
-    chunk_span_sum_values = sum(get_span_value(chunk.span()) for chunk in children_chunks)
+    chunk_span_sum_values = sum(
+        get_span_value(chunk.span()) for chunk in children_chunks
+    )
     next_level_chunk_bytes = serialize_bytes(**chunk_addresses)
 
     return make_chunk(
@@ -110,9 +115,11 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
     """
     Calculates the next level of a Binary Merkle Tree (BMT) given a set of chunks and an optional carrier chunk.
 
-    :param chunks: List of Chunk objects
-    :param carrier_chunk: Optional Chunk object to be considered as a carrier chunk
-    :returns: A dictionary containing the next level chunks and the next level carrier chunk
+    Args:
+        chunks: List of Chunk objects
+        carrier_chunk: Optional Chunk object to be considered as a carrier chunk
+    Returns
+                : A dictionary containing the next level chunks and the next level carrier chunk
     """
     if not chunks:
         msg = "The given chunk array is empty"
@@ -125,7 +132,9 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
 
     for offset in range(0, len(chunks), max_segment_count):
         children_chunks = chunks[offset : offset + max_segment_count]
-        next_level_chunks.append(create_intermediate_chunk(children_chunks, span_length, max_payload_length))
+        next_level_chunks.append(
+            create_intermediate_chunk(children_chunks, span_length, max_payload_length)
+        )
 
     # Edge case handling when there is a carrierChunk
     next_level_carrier_chunk = carrier_chunk
@@ -148,9 +157,10 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
 def bmt_root_chunk(chunks: list[Chunk]) -> Chunk:
     """
     Calculates the root chunk of a Binary Merkle Tree (BMT) given a set of chunks.
-
-    :param chunks: List of Chunk objects
-    :returns: The root chunk of the BMT
+    Args:
+        chunks: List of Chunk objects
+    Returns:
+        The root chunk of the BMT
     """
     if not chunks:
         msg = "given chunk array is empty"
@@ -171,8 +181,10 @@ def bmt(leaf_chunks: list[Chunk]) -> list[list[Chunk]]:
     """
     Calculates the Binary Merkle Tree (BMT) given a set of leaf chunks.
 
-    :param leaf_chunks: List of Chunk objects representing leaf chunks
-    :returns: A list of lists of Chunk objects representing the BMT levels
+    Args:
+        leaf_chunks: List of Chunk objects representing leaf chunks
+    Returns:
+        A list of lists of Chunk objects representing the BMT levels
     """
     if not leaf_chunks:
         msg = "given chunk array is empty"
@@ -195,11 +207,12 @@ def get_bmt_index_of_segment(
 ) -> dict:
     """
     Get the chunk's position of a given payload segment index in the BMT tree.
-
-    :param segment_index: The segment index of the payload
-    :param last_chunk_index: The last chunk index on the BMT level of the segment
-    :param max_chunk_payload_byte_length: Maximum byte length of a chunk. Default is 4096
-    :return: A dictionary with 'level' and 'chunk_index' keys
+    Args:
+        segment_index: The segment index of the payload
+        last_chunk_index: The last chunk index on the BMT level of the segment
+        max_chunk_payload_byte_length: Maximum byte length of a chunk. Default is 4096
+    Returns:
+        A dictionary with 'level' and 'chunk_index' keys
     """
     # 128 by default
     max_segment_count = max_chunk_payload_byte_length // SEGMENT_SIZE
@@ -239,11 +252,13 @@ def file_address_from_inclusion_proof(
     """
     Calculates the file address based on the inclusion proof segments and the proved segment.
 
-    :param prove_chunks: A list of chunk inclusion proofs
-    :param prove_segment: A bytes representing the proved segment
-    :param prove_segment_index: The segment index of the proved segment
-    :param max_chunk_payload_byte_length: Maximum byte length of a chunk. Default is 4096
-    :return: The calculated file address
+    Args:
+        prove_chunks: A list of chunk inclusion proofs
+        prove_segment: A bytes representing the proved segment
+        prove_segment_index: The segment index of the proved segment
+        max_chunk_payload_byte_length: Maximum byte length of a chunk. Default is 4096
+    Returns:
+        The calculated file address
     """
     max_segment_count = max_chunk_payload_byte_length // SEGMENT_SIZE
     chunk_bmt_levels = log2(max_segment_count)
@@ -273,7 +288,9 @@ def file_address_from_inclusion_proof(
         # this line is necessary if the prove_segment_index was in a carrierChunk
         prove_segment_index = parent_chunk_index
 
-        last_chunk_index = last_chunk_index >> (chunk_bmt_levels + level * chunk_bmt_levels)
+        last_chunk_index = last_chunk_index >> (
+            chunk_bmt_levels + level * chunk_bmt_levels
+        )
 
     return calculated_hash
 
@@ -285,9 +302,11 @@ def file_inclusion_proof_bottom_up(
     """
     Gives back required sister segments of a given payload segment index for inclusion proof.
 
-    :param chunked_file: The chunked file object
-    :param segment_index: The segment index of the payload
-    :return: A list of chunk inclusion proofs
+    Args:
+        chunked_file: The chunked file object
+        segment_index: The segment index of the payload
+    Returns:
+        A list of chunk inclusion proofs
     """
     if segment_index * SEGMENT_SIZE >= get_span_value(chunked_file.span()):
         msg = f"The given segment index {segment_index} is greater than {get_span_value(chunked_file.span()) // SEGMENT_SIZE}"  # noqa: E501
@@ -311,7 +330,9 @@ def file_inclusion_proof_bottom_up(
                 raise ValueError(msg)
             segment_index >>= chunk_bmt_levels
             while segment_index % max_segment_count == 0:
-                next_level_chunks, next_level_carrier_chunk = next_bmt_level(level_chunks, carrier_chunk)
+                next_level_chunks, next_level_carrier_chunk = next_bmt_level(
+                    level_chunks, carrier_chunk
+                )
                 level_chunks = next_level_chunks
                 carrier_chunk = next_level_carrier_chunk
                 segment_index >>= chunk_bmt_levels
@@ -321,17 +342,23 @@ def file_inclusion_proof_bottom_up(
         chunk = level_chunks[chunk_index_for_proof]
         sister_segments = chunk.inclusion_proof(chunk_segment_index)
         chunk_inclusion_proofs.append(
-            ChunkInclusionProof.model_validate({"sister_segments": sister_segments, "span": chunk.span()})
+            ChunkInclusionProof.model_validate(
+                {"sister_segments": sister_segments, "span": chunk.span()}
+            )
         )
         segment_index = chunk_index_for_proof
 
-        next_level_chunks, next_level_carrier_chunk = next_bmt_level(level_chunks, carrier_chunk)
+        next_level_chunks, next_level_carrier_chunk = next_bmt_level(
+            level_chunks, carrier_chunk
+        )
         level_chunks = next_level_chunks
         carrier_chunk = next_level_carrier_chunk
 
     sister_segments = level_chunks[0].inclusion_proof(segment_index)
     chunk_inclusion_proofs.append(
-        ChunkInclusionProof.model_validate({"sister_segments": sister_segments, "span": level_chunks[0].span()})
+        ChunkInclusionProof.model_validate(
+            {"sister_segments": sister_segments, "span": level_chunks[0].span()}
+        )
     )
 
     return chunk_inclusion_proofs
@@ -341,9 +368,11 @@ def make_chunked_file(payload: bytes, options: Optional[dict] = None) -> Chunked
     """
     Creates an object for performing BMT functions on payload data.
 
-    :param payload: The byte array of the data.
-    :param options: The settings for the used chunks.
-    :return: A `ChunkedFile` object with helper methods.
+    Args:
+        payload: The byte array of the data.
+        options: The settings for the used chunks.
+    Returns:
+        A `ChunkedFile` object with helper methods.
     """
     options = options or {}
     max_payload_length = options.get("max_payload_length", DEFAULT_MAX_PAYLOAD_SIZE)
@@ -356,7 +385,9 @@ def make_chunked_file(payload: bytes, options: Optional[dict] = None) -> Chunked
             chunks.append(make_chunk(b"", options))
         else:
             for offset in range(0, len(payload), max_payload_length):
-                chunks.append(make_chunk(payload[offset : offset + max_payload_length], options))
+                chunks.append(
+                    make_chunk(payload[offset : offset + max_payload_length], options)
+                )
         return chunks
 
     def span() -> bytes:
