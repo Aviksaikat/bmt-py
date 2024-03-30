@@ -3,7 +3,7 @@ from typing import Callable, Optional, Union
 from pydantic import BaseModel, validator
 
 from bmt_py.span import DEFAULT_SPAN_SIZE, make_span
-from bmt_py.utils import FlexBytes, assert_flex_bytes, keccak256_hash
+from bmt_py.utils import assert_flex_bytes, keccak256_hash, serialize_bytes
 
 # * Constants
 SEGMENT_SIZE = 32
@@ -31,6 +31,9 @@ class Message(BaseModel):
             msg = f"The message must be a string, a list, bytes, or a bytearray, not {type(v)}"
             raise ValueError(msg)
         return v
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class Options(BaseModel):
@@ -64,12 +67,12 @@ class Chunk(BaseModel):
         during object creation.
     """
 
-    payload: FlexBytes
+    payload: bytes
     max_payload_length: int
     span_length: int
-    data: ValidChunkData
+    data: Callable[[], bytes]
     span: Callable[[], bytes]
-    address: Callable[[], ChunkAddress]
+    address: Callable[[], bytes]
     inclusion_proof: Callable[[int], bytes]
     bmt: Callable[[], bytes]
 
@@ -186,15 +189,17 @@ def root_hash_from_inclusion_proof(
 
 
 def bmt_root_hash(
-    chunk_data: bytes, max_payload_length: int = DEFAULT_MAX_PAYLOAD_SIZE, options=None
+    chunk_data: bytes,
+    max_payload_length: int = DEFAULT_MAX_PAYLOAD_SIZE,
+    options: Optional[dict] = None,
 ) -> bytes:
     """
     Calculate the root hash of a binary Merkle tree (BMT) from the chunk data.
 
     Args:
-        chunk_data: Chunk data as bytes
-        max_payload_length: Maximum payload length, defaults to DEFAULT_MAX_PAYLOAD_SIZE
-        options: Function configurations, including a custom hash function
+        chunk_data (bytes): Chunk data as bytes
+        max_payload_length (int): Maximum payload length, defaults to DEFAULT_MAX_PAYLOAD_SIZE
+        options (Optional dict): Function configurations, including a custom hash function
 
     Returns:
         The root hash of the binary Merkle tree as bytes
@@ -207,16 +212,14 @@ def bmt_root_hash(
 
     # Create a buffer padded with zeros
     padded_data = chunk_data + b"\x00" * (max_payload_length - len(chunk_data))
-    hash_size = 32  # Assuming a 256-bit hash size
-    segment_pair_size = 64  # Assuming 32-byte segments
 
-    while len(padded_data) != hash_size:
+    while len(padded_data) != HASH_SIZE:
         hashed_data = bytearray(len(padded_data) // 2)
 
         # In each round, we hash the segment pairs together
-        for offset in range(0, len(padded_data), segment_pair_size):
+        for offset in range(0, len(padded_data), SEGMENT_PAIR_SIZE):
             hash_result = hash_function(
-                padded_data[offset : offset + segment_pair_size]
+                padded_data[offset : offset + SEGMENT_PAIR_SIZE]
             )
             hashed_data[offset // 2 : offset // 2 + len(hash_result)] = hash_result
 
@@ -230,7 +233,7 @@ def chunk_address(
     span_length: Optional[int],
     chunk_span: Optional[bytes],
     options: Optional[dict] = None,
-):
+) -> bytes:
     """
     Calculate the chunk address from the Binary Merkle Tree of the chunk data
 
@@ -251,11 +254,12 @@ def chunk_address(
         The Chunk address in a byte array
     """
     if chunk_span is None:
+        span_length = span_length if span_length else None
         chunk_span = make_span(len(payload_bytes), span_length)
 
     hash_function = options.get("hashFn", keccak256_hash) if options else keccak256_hash
 
-    root_hash = bmt_root_hash(payload_bytes, 4096, hash_function)
+    root_hash = bmt_root_hash(payload_bytes, 4096, {"hashFn": hash_function})
     chunk_hash_input = bytes(chunk_span + root_hash)
 
     return hash_function(chunk_hash_input)
@@ -277,21 +281,21 @@ def make_chunk(
         msg = f"Invalid FlexBytes: b is {payload_bytes!r}, min_length is {0}, max_length is {max_payload_length}."
         raise TypeError(msg)
 
-    payload_bytes = (max_payload_length - len(payload_bytes)) * b"\0"
+    padding_chunked_len = (max_payload_length - len(payload_bytes)) * b"\0"
 
     # Function/Method definitions.
     def span() -> bytes:
         return make_span(starting_span_value, span_length)
 
     def data() -> bytes:
-        return payload_bytes
+        return serialize_bytes(payload_bytes, bytes(padding_chunked_len))
 
     def inclusion_proof(segment_index: int) -> list[bytes]:
         return inclusion_proof_bottom_up(
             payload_bytes, segment_index, {"hash_fn": hash_fn}
         )
 
-    def address() -> str:
+    def address() -> bytes:
         return chunk_address(payload_bytes, span_length, span(), {"hash_fn": hash_fn})
 
     def _bmt() -> list[bytes]:

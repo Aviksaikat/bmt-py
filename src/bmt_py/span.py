@@ -7,7 +7,7 @@ DEFAULT_SPAN_SIZE = 8
 MAX_SPAN_LENGTH = 2**32 - 1
 
 
-def make_span(value: int, length: Optional[int]) -> bytes:
+def make_span(value: int, length: Optional[int] = DEFAULT_SPAN_SIZE) -> bytes:
     """
     Creates a span for storing the length of a chunk.
 
@@ -20,15 +20,6 @@ def make_span(value: int, length: Optional[int]) -> bytes:
     Returns:
         bytes: The span representing the chunk length.
     """
-    if length:
-        if length <= 0:
-            msg = "Invalid length for span"
-            raise ValueError(msg, length)
-
-        if length > MAX_SPAN_LENGTH:
-            msg = "Invalid length (> MAX_SPAN_LENGTH)"
-            raise ValueError(msg, length)
-
     if value < 0:
         msg = f"invalid length for span: {value}"
         raise ValueError(msg)
@@ -37,10 +28,12 @@ def make_span(value: int, length: Optional[int]) -> bytes:
         msg = f"invalid length (> {MAX_SPAN_LENGTH}) {value}"
         raise ValueError(msg)
 
-    # 'Q' is the format character for a 64-bit unsigned integer in little endian
-    span = struct.pack("Q", value)
+    span = bytearray(length)  # type: ignore
+    length_lower_32 = value & 0xFFFFFFFF
 
-    return span
+    struct.pack_into("<I", span, 0, length_lower_32)  # Pack the lower 32 bits as little endian
+
+    return bytes(span)
 
 
 def get_span_value(span: bytes) -> int:

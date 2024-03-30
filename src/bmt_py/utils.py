@@ -74,10 +74,7 @@ def is_flex_bytes(b: Any, flex_bytes: FlexBytes) -> TypeGuard[bytes]:
             True if the value is a byte array within the specified length range, False otherwise.
     """
 
-    return (
-        isinstance(b, bytes)
-        and flex_bytes.min_length <= len(b) <= flex_bytes.max_length
-    )
+    return isinstance(b, bytes) and flex_bytes.min_length <= len(b) <= flex_bytes.max_length
 
 
 def bytes_to_hex(inp: Union[bytes, str], length: Optional[int] = None) -> str:

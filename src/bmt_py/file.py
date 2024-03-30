@@ -96,9 +96,7 @@ def create_intermediate_chunk(
         A new intermediate chunk
     """
     chunk_addresses = [chunk.address() for chunk in children_chunks]
-    chunk_span_sum_values = sum(
-        get_span_value(chunk.span()) for chunk in children_chunks
-    )
+    chunk_span_sum_values = sum(get_span_value(chunk.span()) for chunk in children_chunks)
     next_level_chunk_bytes = serialize_bytes(**chunk_addresses)
 
     return make_chunk(
@@ -132,9 +130,7 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
 
     for offset in range(0, len(chunks), max_segment_count):
         children_chunks = chunks[offset : offset + max_segment_count]
-        next_level_chunks.append(
-            create_intermediate_chunk(children_chunks, span_length, max_payload_length)
-        )
+        next_level_chunks.append(create_intermediate_chunk(children_chunks, span_length, max_payload_length))
 
     # Edge case handling when there is a carrierChunk
     next_level_carrier_chunk = carrier_chunk
@@ -288,9 +284,7 @@ def file_address_from_inclusion_proof(
         # this line is necessary if the prove_segment_index was in a carrierChunk
         prove_segment_index = parent_chunk_index
 
-        last_chunk_index = last_chunk_index >> (
-            chunk_bmt_levels + level * chunk_bmt_levels
-        )
+        last_chunk_index = last_chunk_index >> (chunk_bmt_levels + level * chunk_bmt_levels)
 
     return calculated_hash
 
@@ -330,9 +324,7 @@ def file_inclusion_proof_bottom_up(
                 raise ValueError(msg)
             segment_index >>= chunk_bmt_levels
             while segment_index % max_segment_count == 0:
-                next_level_chunks, next_level_carrier_chunk = next_bmt_level(
-                    level_chunks, carrier_chunk
-                )
+                next_level_chunks, next_level_carrier_chunk = next_bmt_level(level_chunks, carrier_chunk)
                 level_chunks = next_level_chunks
                 carrier_chunk = next_level_carrier_chunk
                 segment_index >>= chunk_bmt_levels
@@ -342,23 +334,17 @@ def file_inclusion_proof_bottom_up(
         chunk = level_chunks[chunk_index_for_proof]
         sister_segments = chunk.inclusion_proof(chunk_segment_index)
         chunk_inclusion_proofs.append(
-            ChunkInclusionProof.model_validate(
-                {"sister_segments": sister_segments, "span": chunk.span()}
-            )
+            ChunkInclusionProof.model_validate({"sister_segments": sister_segments, "span": chunk.span()})
         )
         segment_index = chunk_index_for_proof
 
-        next_level_chunks, next_level_carrier_chunk = next_bmt_level(
-            level_chunks, carrier_chunk
-        )
+        next_level_chunks, next_level_carrier_chunk = next_bmt_level(level_chunks, carrier_chunk)
         level_chunks = next_level_chunks
         carrier_chunk = next_level_carrier_chunk
 
     sister_segments = level_chunks[0].inclusion_proof(segment_index)
     chunk_inclusion_proofs.append(
-        ChunkInclusionProof.model_validate(
-            {"sister_segments": sister_segments, "span": level_chunks[0].span()}
-        )
+        ChunkInclusionProof.model_validate({"sister_segments": sister_segments, "span": level_chunks[0].span()})
     )
 
     return chunk_inclusion_proofs
@@ -385,15 +371,13 @@ def make_chunked_file(payload: bytes, options: Optional[dict] = None) -> Chunked
             chunks.append(make_chunk(b"", options))
         else:
             for offset in range(0, len(payload), max_payload_length):
-                chunks.append(
-                    make_chunk(payload[offset : offset + max_payload_length], options)
-                )
+                chunks.append(make_chunk(payload[offset : offset + max_payload_length], options))
         return chunks
 
     def span() -> bytes:
         return make_span(len(payload), span_length)
 
-    def address() -> ChunkAddress:
+    def address() -> bytes:
         return bmt_root_chunk(leaf_chunks()).address()
 
     def root_chunk() -> Chunk:

@@ -20,7 +20,6 @@ requires-python = ">=3.9"
 dependencies = [
   "eth-utils",
   "pydantic",
-  "swarm-bee-py",
 ]
 
 # Don't know we need this or not
@@ -99,8 +98,10 @@ ignore = [
     "ISC001"
 ]
 
-# [tool.ruff.lint]
-# extend-select = ["I", "TRY", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252", "PLR2004"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=src/bmt_py/ --cov-report=term-missing"
@@ -155,6 +156,7 @@ docs-build = "mkdocs build"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "swarm-bee-py",
 ]
 
 [[tool.hatch.envs.test.matrix]]
