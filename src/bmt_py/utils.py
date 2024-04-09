@@ -1,7 +1,7 @@
 from typing import Any, Generic, Optional, TypeVar, Union
 
 from eth_utils import keccak, to_hex
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing_extensions import TypeGuard
 
 Min = TypeVar("Min", bound=int)
@@ -24,11 +24,10 @@ class FlexBytes(BaseModel, Generic[Min, Max]):
         ValueError: If the length of the byte array is not within the specified range.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     min_length: Min
     max_length: Max
-
-    class Config:
-        validate_assignment = True
 
 
 def keccak256_hash(*messages: Union[bytes, bytearray]) -> bytes:
@@ -77,7 +76,7 @@ def is_flex_bytes(b: Any, flex_bytes: FlexBytes) -> TypeGuard[bytes]:
     return isinstance(b, bytes) and flex_bytes.min_length <= len(b) <= flex_bytes.max_length
 
 
-def bytes_to_hex(inp: Union[bytes, str], length: Optional[int] = None) -> str:
+def bytes_to_hex(inp: Union[bytes, str, bytearray], length: Optional[int] = None) -> str:
     """Converts a byte array to a hexadecimal string.
 
     Args:
@@ -95,6 +94,11 @@ def bytes_to_hex(inp: Union[bytes, str], length: Optional[int] = None) -> str:
         hex_string = to_hex(inp)
     elif isinstance(inp, str):
         hex_string = to_hex(inp.encode())
+    elif isinstance(inp, bytearray):
+        hex_string = to_hex(inp)
+    else:
+        msg = "Invalid input type"
+        raise ValueError(msg)
 
     if hex_string.startswith("0x"):
         hex_string = hex_string[2:]  # type: ignore

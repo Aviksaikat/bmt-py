@@ -1,7 +1,7 @@
 from math import floor, log2
 from typing import Callable, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from bmt_py.chunk import (
     DEFAULT_MAX_PAYLOAD_SIZE,
@@ -49,15 +49,14 @@ class ChunkedFile(BaseModel):
         during object creation.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     leaf_chunks: Callable[[], list]
     root_chunk: Callable
     payload: bytes
     address: Callable[[], ChunkAddress]
     span: Callable[[], bytes]
     bmt: Callable[[], list[list[Chunk]]]
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 def pop_carrier_chunk(chunks: list[Chunk]) -> Optional[Chunk]:
@@ -97,7 +96,7 @@ def create_intermediate_chunk(
     """
     chunk_addresses = [chunk.address() for chunk in children_chunks]
     chunk_span_sum_values = sum(get_span_value(chunk.span()) for chunk in children_chunks)
-    next_level_chunk_bytes = serialize_bytes(**chunk_addresses)
+    next_level_chunk_bytes = serialize_bytes(*chunk_addresses)
 
     return make_chunk(
         next_level_chunk_bytes,
@@ -109,7 +108,7 @@ def create_intermediate_chunk(
     )
 
 
-def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -> dict:
+def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -> tuple:
     """
     Calculates the next level of a Binary Merkle Tree (BMT) given a set of chunks and an optional carrier chunk.
 
@@ -117,7 +116,7 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
         chunks: List of Chunk objects
         carrier_chunk: Optional Chunk object to be considered as a carrier chunk
     Returns
-                : A dictionary containing the next level chunks and the next level carrier chunk
+                : A tuple containing the next level chunks and the next level carrier chunk
     """
     if not chunks:
         msg = "The given chunk array is empty"
@@ -144,10 +143,7 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
         # Try to pop carrier chunk if it exists on the level
         next_level_carrier_chunk = pop_carrier_chunk(next_level_chunks)
 
-    return {
-        "nextLevelChunks": next_level_chunks,
-        "nextLevelCarrierChunk": next_level_carrier_chunk,
-    }
+    return next_level_chunks, next_level_carrier_chunk
 
 
 def bmt_root_chunk(chunks: list[Chunk]) -> Chunk:
@@ -166,9 +162,7 @@ def bmt_root_chunk(chunks: list[Chunk]) -> Chunk:
     carrier_chunk = pop_carrier_chunk(level_chunks)
 
     while len(level_chunks) != 1 or carrier_chunk:
-        result = next_bmt_level(level_chunks, carrier_chunk)
-        level_chunks = result["nextLevelChunks"]
-        carrier_chunk = result["nextLevelCarrierChunk"]
+        level_chunks, carrier_chunk = next_bmt_level(level_chunks, carrier_chunk)
 
     return level_chunks[0]
 
@@ -189,9 +183,8 @@ def bmt(leaf_chunks: list[Chunk]) -> list[list[Chunk]]:
     level_chunks = [leaf_chunks]
     carrier_chunk = pop_carrier_chunk(leaf_chunks)
     while len(level_chunks[-1]) != 1:
-        result = next_bmt_level(level_chunks[-1], carrier_chunk)
-        carrier_chunk = result["nextLevelCarrierChunk"]
-        level_chunks.append(result["nextLevelChunks"])
+        next_level_chunks, carrier_chunk = next_bmt_level(level_chunks[-1], carrier_chunk)
+        level_chunks.append(next_level_chunks)
 
     return level_chunks
 
@@ -200,7 +193,7 @@ def get_bmt_index_of_segment(
     segment_index: int,
     last_chunk_index: int,
     max_chunk_payload_byte_length: int = 4096,
-) -> dict:
+) -> tuple:
     """
     Get the chunk's position of a given payload segment index in the BMT tree.
     Args:
@@ -208,7 +201,7 @@ def get_bmt_index_of_segment(
         last_chunk_index: The last chunk index on the BMT level of the segment
         max_chunk_payload_byte_length: Maximum byte length of a chunk. Default is 4096
     Returns:
-        A dictionary with 'level' and 'chunk_index' keys
+        A tuple of 'level' and 'chunk_index'
     """
     # 128 by default
     max_segment_count = max_chunk_payload_byte_length // SEGMENT_SIZE
@@ -233,10 +226,7 @@ def get_bmt_index_of_segment(
     else:
         segment_index >>= chunk_bmt_levels
 
-    return {
-        "chunk_index": segment_index,
-        "level": level,
-    }
+    return (segment_index, level)
 
 
 def file_address_from_inclusion_proof(
@@ -257,7 +247,7 @@ def file_address_from_inclusion_proof(
         The calculated file address
     """
     max_segment_count = max_chunk_payload_byte_length // SEGMENT_SIZE
-    chunk_bmt_levels = log2(max_segment_count)
+    chunk_bmt_levels = int(log2(max_segment_count))
 
     file_size = get_span_value(prove_chunks[-1].span)
     last_chunk_index = floor((file_size - 1) / max_chunk_payload_byte_length)
@@ -313,23 +303,25 @@ def file_inclusion_proof_bottom_up(
     chunk_bmt_levels = int(log2(max_segment_count))
     carrier_chunk = pop_carrier_chunk(level_chunks)
     chunk_inclusion_proofs = []
-
     while len(level_chunks) != 1 or carrier_chunk:
         chunk_segment_index = segment_index % max_segment_count
         chunk_index_for_proof = segment_index // max_segment_count
 
+        # edge-case carrier chunk
         if chunk_index_for_proof == len(level_chunks):
+            # carrier chunk has been placed to somewhere else in the bmt_tree
             if not carrier_chunk:
                 msg = "Impossible"
                 raise ValueError(msg)
-            segment_index >>= chunk_bmt_levels
+            segment_index >>= chunk_bmt_levels  # log2(128) -> skip this level check now
             while segment_index % max_segment_count == 0:
                 next_level_chunks, next_level_carrier_chunk = next_bmt_level(level_chunks, carrier_chunk)
                 level_chunks = next_level_chunks
                 carrier_chunk = next_level_carrier_chunk
                 segment_index >>= chunk_bmt_levels
-
+            # the carrier chunk is already placed in the BMT tree
             chunk_index_for_proof = len(level_chunks) - 1
+            # continue the inclusion proofing of the inserted carrier_chunk address
 
         chunk = level_chunks[chunk_index_for_proof]
         sister_segments = chunk.inclusion_proof(chunk_segment_index)

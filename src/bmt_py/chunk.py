@@ -1,6 +1,6 @@
 from typing import Callable, Optional, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from bmt_py.span import DEFAULT_SPAN_SIZE, make_span
 from bmt_py.utils import assert_flex_bytes, keccak256_hash, serialize_bytes
@@ -22,18 +22,16 @@ class ValidChunkData(BaseModel):
 
 
 class Message(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     message: Union[str, list[Union[int, bytes]], bytes, bytearray]
 
     # Add a custom validator to ensure that the message is of the correct type
-    @validator("message")
+    @field_validator("message")
     def validate_message_type(cls, v):  # noqa: N805
         if not isinstance(v, (str, list, bytes, bytearray)):
             msg = f"The message must be a string, a list, bytes, or a bytearray, not {type(v)}"
             raise ValueError(msg)
         return v
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class Options(BaseModel):
@@ -67,17 +65,16 @@ class Chunk(BaseModel):
         during object creation.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     payload: bytes
     max_payload_length: int
     span_length: int
     data: Callable[[], bytes]
     span: Callable[[], bytes]
     address: Callable[[], bytes]
-    inclusion_proof: Callable[[int], bytes]
+    inclusion_proof: Callable[[int], list[bytes]]
     bmt: Callable[[], bytes]
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 def bmt(payload: bytes, options: Optional[dict] = None) -> list[bytes]:
@@ -107,9 +104,7 @@ def bmt(payload: bytes, options: Optional[dict] = None) -> list[bytes]:
 
         # In each round, we hash the segment pairs together
         for offset in range(0, len(padded_data), SEGMENT_PAIR_SIZE):
-            hash_result = hash_function(
-                padded_data[offset : offset + SEGMENT_PAIR_SIZE]
-            )
+            hash_result = hash_function(padded_data[offset : offset + SEGMENT_PAIR_SIZE])
             hashed_data[offset // 2 : offset // 2 + len(hash_result)] = hash_result
 
         padded_data = hashed_data
@@ -120,9 +115,7 @@ def bmt(payload: bytes, options: Optional[dict] = None) -> list[bytes]:
     return bmt_tree
 
 
-def inclusion_proof_bottom_up(
-    payload_bytes: bytes, segment_index: int, options: Optional[dict] = None
-):
+def inclusion_proof_bottom_up(payload_bytes: bytes, segment_index: int, options: Optional[dict] = None) -> list[bytes]:
     """
     Gives back required segments for inclusion proof of a given payload byte index.
 
@@ -143,11 +136,7 @@ def inclusion_proof_bottom_up(
     for level in range(root_hash_level):
         merge_coefficient = 1 if segment_index % 2 == 0 else -1
         sister_segment_index = segment_index + merge_coefficient
-        sister_segment = tree[level][
-            sister_segment_index
-            * SEGMENT_SIZE : (sister_segment_index + 1)
-            * SEGMENT_SIZE
-        ]
+        sister_segment = tree[level][sister_segment_index * SEGMENT_SIZE : (sister_segment_index + 1) * SEGMENT_SIZE]
         sister_segments.append(sister_segment)
         # Update segment_index for the next iteration
         segment_index >>= 1
@@ -218,9 +207,7 @@ def bmt_root_hash(
 
         # In each round, we hash the segment pairs together
         for offset in range(0, len(padded_data), SEGMENT_PAIR_SIZE):
-            hash_result = hash_function(
-                padded_data[offset : offset + SEGMENT_PAIR_SIZE]
-            )
+            hash_result = hash_function(padded_data[offset : offset + SEGMENT_PAIR_SIZE])
             hashed_data[offset // 2 : offset // 2 + len(hash_result)] = hash_result
 
         padded_data = hashed_data
@@ -291,9 +278,7 @@ def make_chunk(
         return serialize_bytes(payload_bytes, bytes(padding_chunked_len))
 
     def inclusion_proof(segment_index: int) -> list[bytes]:
-        return inclusion_proof_bottom_up(
-            payload_bytes, segment_index, {"hash_fn": hash_fn}
-        )
+        return inclusion_proof_bottom_up(data(), segment_index, {"hash_fn": hash_fn})
 
     def address() -> bytes:
         return chunk_address(payload_bytes, span_length, span(), {"hash_fn": hash_fn})
