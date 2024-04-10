@@ -132,7 +132,7 @@ dependencies = [
 dependencies = [
   "mkdocs-material",
   "mkdocstrings-python",
-  "bmt_py @ file:///../bmt_py"
+  "bmt_py @ {root:uri}/"
 ]
 
 [tool.hatch.envs.default.scripts]
