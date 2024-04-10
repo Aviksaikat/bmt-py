@@ -26,7 +26,7 @@ jobs:
         hatch run lint-check
     - name: coverage test
       run: |
-        hatch run test-cov-xml
+        hatch run test:test-cov-xml
     - uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
