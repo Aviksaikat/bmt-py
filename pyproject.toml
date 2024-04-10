@@ -160,8 +160,8 @@ dependencies = [
 ]
 
 [[tool.hatch.envs.test.matrix]]
-# python = ["3.9", "3.10", "3.11"] # "3.12"
-python = ["3.9"]
+python = ["3.9", "3.10", "3.11"] # "3.12"
+# python = ["3.9"]
 # version = ["42", "3.14"]
 
 
