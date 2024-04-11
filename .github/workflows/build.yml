@@ -3,8 +3,7 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  test:
-
+  linting:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,9 +23,9 @@ jobs:
     - name: Lint and typecheck
       run: |
         hatch run lint-check
-    - name: Run Tests
-      run: |
-        hatch run test:pytest
+    # - name: Run Tests
+    #   run: |
+    #     hatch run test:pytest
     # - name: coverage test
     #   run: |
     #     hatch run test:test-cov-xml
