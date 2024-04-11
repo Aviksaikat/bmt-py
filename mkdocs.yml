@@ -63,3 +63,4 @@ nav:
     - Development: development.md
     - Reference:
         - bmt_py: reference/bmt_py.md
+        - API: reference/API.md
