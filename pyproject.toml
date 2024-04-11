@@ -6,6 +6,7 @@ authors = [
 description = "Binary Merkle Tree operations on data"
 readme = "README.md"
 dynamic = ["version"]
+license = { file = "LICENSE" }
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python",
