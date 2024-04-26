@@ -17,6 +17,24 @@
 
 </div>
 
+# Usage
+
+```py
+>>> from bmt_py import make_chunk
+
+>>> payload = bytes([1, 2, 3])
+>>> chunk = make_chunk(payload)
+>>> result = chunk.address()
+>>> print(bytes_to_hex(result, 64))
+# ca6357a08e317d15ec560fef34e4c45f8f19f01c372aa70f1da72bfa7f1a4338
+```
+
+- More examples are [here](https://aviksaikat.github.io/bmt-py/Usage).
+
+<details open>
+<summary>How it works</summary>
+<br>
+
 # How it works
 
 First, it splits the data into `chunks` that have maximum 4KB payload by default, but this condition can modified as well as its `span` byte length (8 bytes) that indicates how long byte payload subsumed under the chunk.
@@ -56,13 +74,14 @@ To get these inclusion segments, the library collects all required segments from
 
 ![Inclusion proof](./docs/inclusion-proof.png)
 
+</details>
 
 
 ---
 
-**Documentation**: <a href="https://aviksaikat.github.io/bmt_py/" target="_blank">https://aviksaikat.github.io/bmt_py/</a>
+**Documentation**: <a href="https://aviksaikat.github.io/bmt_py/" target="_blank">https://aviksaikat.github.io/bmt-py/</a>
 
-**Source Code**: <a href="https://github.com/aviksaikat/bmt_py" target="_blank">https://github.com/aviksaikat/bmt_py</a>
+**Source Code**: <a href="https://github.com/aviksaikat/bmt_py" target="_blank">https://github.com/aviksaikat/bmt-py</a>
 
 ---
 
