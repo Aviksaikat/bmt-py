@@ -117,7 +117,7 @@ def test_collect_required_segments_for_inclusion_proof():
 def test_collect_required_segments_for_inclusion_proof_2(bos_bytes):
     with open("The-Book-of-Swarm.pdf", "rb") as f:
         bos_bytes = f.read()
-    chunked_file = make_chunked_file(file_bytes)
+    chunked_file = make_chunked_file(bos_bytes)
     file_hash = chunked_file.address()
 
     # Segment to prove
@@ -158,7 +158,7 @@ def test_collect_required_segments_for_inclusion_proof_3():
     # 128 * 4096 * 128 = 67108864 <- left tree is saturated on bmt level 1
     # 67108864 + 2 * 4096 = 67117056 <- add two full chunks at the end thereby
     # the zero level won't have carrier chunk, but its parent will be that.
-    with open(Path(__file__).parent / ".." / "files" / "carrier-chunk-blob-2", "rb") as f:
+    with open("carrier-chunk-blob-2", "rb") as f:
         carrier_chunk_file_bytes_2 = f.read()
     assert len(carrier_chunk_file_bytes_2) == 67117056
 
