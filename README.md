@@ -29,7 +29,7 @@
 # ca6357a08e317d15ec560fef34e4c45f8f19f01c372aa70f1da72bfa7f1a4338
 ```
 
-- More examples are [here](https://aviksaikat.github.io/bmt-py/Usage).
+- More examples are [here](https://aviksaikat.github.io/bmt-py/reference/Usage/).
 
 <details open>
 <summary>How it works</summary>
