@@ -37,7 +37,7 @@ only_chunk.address() == chunked_file.address()
 ```py
 from bmt_py import make_chunked_file, get_span_value, bytes_to_hex
 with open("The-Book-of-Swarm.pdf", "rb") as f:
-    bos_bytes = f.read()
+    file_bytes = f.read()
 chunked_file = make_chunked_file(file_bytes)
 
 print(get_span_value(chunked_file.span()))

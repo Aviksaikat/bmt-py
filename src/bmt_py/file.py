@@ -35,12 +35,12 @@ class ChunkedFile(BaseModel):
     for a given chunk and its index.
 
     Attributes:
-        leaf_chunks: List[Chunk]
+        leaf_chunks: list[Chunk]
         root_chunk: Chunk
         payload: bytes
         address: ChunkAddress
         span: bytes
-        bmt: List[List[Chunk]]
+        bmt: list[list[Chunk]]
 
     Notes:
         This class extends Pydantic's :class:`BaseModel`.
@@ -113,7 +113,7 @@ def next_bmt_level(chunks: list[Chunk], carrier_chunk: Optional[Chunk] = None) -
     Calculates the next level of a Binary Merkle Tree (BMT) given a set of chunks and an optional carrier chunk.
 
     Args:
-        chunks: List of Chunk objects
+        chunks: list of Chunk objects
         carrier_chunk: Optional Chunk object to be considered as a carrier chunk
     Returns
                 : A tuple containing the next level chunks and the next level carrier chunk
@@ -150,7 +150,7 @@ def bmt_root_chunk(chunks: list[Chunk]) -> Chunk:
     """
     Calculates the root chunk of a Binary Merkle Tree (BMT) given a set of chunks.
     Args:
-        chunks: List of Chunk objects
+        chunks: list of Chunk objects
     Returns:
         The root chunk of the BMT
     """
@@ -172,7 +172,7 @@ def bmt(leaf_chunks: list[Chunk]) -> list[list[Chunk]]:
     Calculates the Binary Merkle Tree (BMT) given a set of leaf chunks.
 
     Args:
-        leaf_chunks: List of Chunk objects representing leaf chunks
+        leaf_chunks: list of Chunk objects representing leaf chunks
     Returns:
         A list of lists of Chunk objects representing the BMT levels
     """
