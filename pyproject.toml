@@ -21,6 +21,7 @@ requires-python = ">=3.9"
 dependencies = [
   "eth-utils",
   "pydantic",
+  "pycryptodome"
 ]
 
 # Don't know we need this or not
