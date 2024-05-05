@@ -64,7 +64,7 @@ jobs:
         hatch build
     - name: Publish
       uses: pypa/gh-action-pypi-publish@release/v1
-       with:
+      with:
         packages-dir: dist/
     # - name: Create release
     #   uses: ncipollo/release-action@v1
