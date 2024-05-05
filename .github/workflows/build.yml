@@ -62,9 +62,11 @@ jobs:
     - name: Build
       run: |
         hatch build
-    - name: Publish
+    - name: Publish 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
+        user: __token__
+        password: ${{ secrets.PYPI_SECRECT }}
         packages-dir: dist/
     # - name: Create release
     #   uses: ncipollo/release-action@v1
