@@ -106,7 +106,7 @@ ignore = [
 "tests/**/*" = ["PLR2004", "S101", "TID252", "PLR2004"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/bmt_py/ --cov-report=term-missing"
+addopts = "--cov=src/bmt_py/ --cov-report=term-missing -p no:ape_test" # ignore eth-ape plugin
 
 [tool.hatch]
 
