@@ -32,8 +32,11 @@ jobs:
         hatch run test:pytest
     - name: coverage test
       run: |
-        hatch run test:test-cov-xml
+        if [ "${{ matrix.python_version }}" == "3.9" ]; then
+          hatch run test:test-cov-xml
+        fi
     - uses: codecov/codecov-action@v4
+      if: matrix.python_version == '3.9'
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
@@ -62,12 +65,21 @@ jobs:
     - name: Build
       run: |
         hatch build
+    - name: Publish 📦 to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        skip_existing: true
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_SECRECT }}
+        packages-dir: dist/
+        repository-url: https://test.pypi.org/legacy/
     - name: Publish 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_SECRECT }}
         packages-dir: dist/
+
     # - name: Create release
     #   uses: ncipollo/release-action@v1
     #   with:
