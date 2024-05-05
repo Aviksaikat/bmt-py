@@ -2,10 +2,10 @@ name-template: '$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 
 categories:
-  - title: 'Features'
+  - title: '🚀 Features'
     labels:
       - 'feat'
-  - title: 'Bug Fixes'
+  - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
   - title: 'Other updates'
