@@ -35,14 +35,3 @@ jobs:
     - name: Run Tests
       run: |
         hatch run test:pytest
-    - name: coverage test
-      run: |
-        if [ "${{ matrix.python_version }}" == "3.9" ]; then
-          hatch run test:test-cov-xml
-        fi
-    - uses: codecov/codecov-action@v4
-      if: matrix.python_version == '3.9'
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
-        verbose: true
