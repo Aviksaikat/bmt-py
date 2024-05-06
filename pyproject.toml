@@ -108,7 +108,7 @@ ignore = [
 [tool.pytest.ini_options]
 addopts = "--cov=src/bmt_py/ --cov-report=term-missing -p no:ape_test" # ignore eth-ape plugin
 
-[tool.hatch]
+# [tool.hatch]
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -116,7 +116,7 @@ allow-direct-references = true
 [tool.hatch.version]
 source = "regex_commit"
 commit_extra_args = ["-e"]
-path = "src/bmt_py/__init__.py"
+path = "src/bmt_py/__version__.py"
 
 # Module dependencies
 [tool.hatch.envs.default]

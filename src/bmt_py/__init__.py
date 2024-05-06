@@ -41,5 +41,3 @@ __all__ = [
     "get_span_value",
     "make_span",
 ]
-
-__version__ = "0.1.2"
