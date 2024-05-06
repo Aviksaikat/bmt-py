@@ -54,7 +54,7 @@ jobs:
       run: |
         hatch build
     - name: Publish 📦 to Test PyPI
-      if: startsWith(github.ref, '')
+      if: startsWith(github.ref, 'refs/heads/main')
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         skip_existing: true
@@ -63,7 +63,7 @@ jobs:
         packages-dir: dist/
         repository-url: https://test.pypi.org/legacy/
     - name: Publish 📦 to PyPI
-      if: startsWith(github.ref, '')
+      if: startsWith(github.ref, 'refs/heads/main')
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
