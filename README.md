@@ -239,9 +239,9 @@ To get these inclusion segments, the library collects all required segments from
 
 ---
 
-**Documentation**: <a href="https://aviksaikat.github.io/bmt_py/" target="_blank">https://aviksaikat.github.io/bmt-py/</a>
+**Documentation**: <a href="https://aviksaikat.github.io/bmt-py/" target="_blank">https://aviksaikat.github.io/bmt-py/</a>
 
-**Source Code**: <a href="https://github.com/aviksaikat/bmt_py" target="_blank">https://github.com/aviksaikat/bmt-py</a>
+**Source Code**: <a href="https://github.com/aviksaikat/bmt-py" target="_blank">https://github.com/Aviksaikat/bmt-py</a>
 
 ---
 
